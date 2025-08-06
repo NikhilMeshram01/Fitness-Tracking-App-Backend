@@ -5,7 +5,7 @@ export interface IWorkout extends Document {
   duration: number;
   caloriesBurned: number;
   workoutDate: Date;
-  exerciseType: "cardio" | "strength" | "yoga" | "flexibilty";
+  exerciseType: "cardio" | "strength" | "yoga" | "flexibility";
 }
 
 const workoutSchema = new Schema<IWorkout>(
@@ -25,5 +25,5 @@ const workoutSchema = new Schema<IWorkout>(
   { timestamps: true }
 );
 
-const Goal = model<IWorkout>("Goal", workoutSchema);
-export default Goal;
+const workout = model<IWorkout>("workout", workoutSchema);
+export default workout;
