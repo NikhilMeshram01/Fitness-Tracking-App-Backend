@@ -1,7 +1,9 @@
 import bcrypt from "bcryptjs";
-import { Document, Schema, model } from "mongoose";
+import { Document, Schema, Types, model } from "mongoose";
+import { string } from "zod/mini";
 
 export interface IUser extends Document {
+  _id: Types.ObjectId;
   email: string;
   password: string;
   firstName: string;
@@ -13,6 +15,7 @@ export interface IUser extends Document {
   role: string;
   level: "beginner" | "intermediate" | "advanced";
   profilePicture: string;
+  refrehToken: string;
   createdAt: Date;
   updatedAt: string;
 }
@@ -46,6 +49,7 @@ const userSchema = new Schema<IUser>(
     height: Number,
     weight: Number,
     profilePicture: String,
+    refrehToken: String,
     level: {
       type: String,
       enum: ["beginner", "intermediate", "advanced"],

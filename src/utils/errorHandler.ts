@@ -11,7 +11,7 @@ export class AppError extends Error {
 
     // initialize properties
     this.statusCode = statusCode;
-    this.status = `${statusCode}`.startsWith("4") ? "fail" : "errro";
+    this.status = `${statusCode}`.startsWith("4") ? "fail" : "error";
     this.isOperational = true; // distinguish operational errors from programming errors
 
     // ensure proper stack trace
@@ -39,16 +39,15 @@ export const globalErrorHandler = (
       stack: err.stack,
     });
   } else {
-    if (err.isOperational) {
-      res.status(err.statusCode).json({
-        status: err.status,
-        message: err.message,
-      });
-    } else {
+    if (!err.isOperational)
       res.status(500).json({
         status: "error",
         message: "Something went wrong",
       });
-    }
+
+    res.status(err.statusCode).json({
+      status: err.status,
+      message: err.message,
+    });
   }
 };

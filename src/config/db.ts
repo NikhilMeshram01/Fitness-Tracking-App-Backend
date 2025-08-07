@@ -5,11 +5,11 @@ dotenv.config();
 
 const connectDB = async () => {
   try {
-    const connection = await mongoose.connect(MONGODB_URI!);
+    const connection = await mongoose.connect(MONGODB_URI);
     console.log("MongoDB connected at : ", connection.connection.host);
-    process.exit(1);
   } catch (error) {
-    console.log("mongodb connection failed");
+    console.log("mongodb connection failed :", error);
+    process.exit(1);
   }
 };
 

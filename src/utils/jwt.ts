@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import type { Request, Response, NextFunction } from "express";
 import { JWT_ACCESS_SECRET_KEY } from "../config/configs.js";
+import type { SignOptions } from "jsonwebtoken";
 
 interface Payload {
   userId: string;
@@ -10,9 +11,14 @@ interface Payload {
 export const generateToken = (
   payload: Payload,
   secret: string,
-  expiresIn: string = "2m"
+  expiresIn: SignOptions["expiresIn"] = "2m"
 ) => {
-  return jwt.sign(payload, secret, { expiresIn });
+  console.log(
+    "generateToken called with expiresIn:",
+    expiresIn,
+    typeof expiresIn
+  );
+  return jwt.sign(payload, secret, { expiresIn: expiresIn }); // ✅ Works fine
 };
 
 export const verifyToken = (token: string, secret: string): Payload => {
@@ -50,6 +56,8 @@ export const authenticateJWT = (
     req.user = user;
     next();
   } catch (error) {
-    return res.status(403).json({ message: "invalid or expired token" });
+    return res
+      .status(403)
+      .json({ message: error || "invalid or expired token" });
   }
 };
