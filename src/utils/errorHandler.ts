@@ -32,7 +32,7 @@ export const globalErrorHandler = (
   // log the error in development
   if (NODE_ENV === "development") {
     console.log("error ", err);
-    res.status(err.statusCode).json({
+    return res.status(err.statusCode).json({
       status: err.status,
       error: err,
       message: err.message,
@@ -40,12 +40,12 @@ export const globalErrorHandler = (
     });
   } else {
     if (!err.isOperational)
-      res.status(500).json({
+      return res.status(500).json({
         status: "error",
         message: "Something went wrong",
       });
 
-    res.status(err.statusCode).json({
+    return res.status(err.statusCode).json({
       status: err.status,
       message: err.message,
     });

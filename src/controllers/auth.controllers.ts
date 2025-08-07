@@ -9,6 +9,7 @@ import {
   JWT_REFRESH_SECRET_KEY,
 } from "../config/configs.js";
 import catchAsync from "../utils/catchAsync.js";
+import { AppError } from "../utils/errorHandler.js";
 
 export const registerUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -27,7 +28,8 @@ export const registerUser = catchAsync(
     // Check if email already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({ message: "Email already in use." });
+      // return res.status(409).json({ message: "Email already in use." });
+      throw new AppError("Email already in use.", 409);
     }
 
     // Create new user
@@ -83,13 +85,17 @@ export const loginUser = catchAsync(
     const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid email or password." });
+      throw new AppError("Invalid email or password.", 401);
+
+      // return res.status(401).json({ message: "Invalid email or password." });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid email or password." });
+      throw new AppError("Invalid email or password.", 401);
+
+      // return res.status(401).json({ message: "Invalid email or password." });
     }
 
     const accessToken = generateToken(
@@ -145,15 +151,19 @@ export const getUserProfile = catchAsync(
     const userId = req.user?.userId; // Assuming `req.user` is set by auth middleware
 
     if (!userId) {
-      return res
-        .status(401)
-        .json({ message: "Unauthorized: No user ID found." });
+      throw new AppError("Unauthorized: No user ID found.", 401);
+
+      // return res
+      //   .status(401)
+      //   .json({ message: "Unauthorized: No user ID found." });
     }
 
     const user = await User.findById(userId).select("-password"); // Exclude password
 
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      throw new AppError("User not found.", 404);
+
+      // return res.status(404).json({ message: "User not found." });
     }
 
     res.status(200).json({

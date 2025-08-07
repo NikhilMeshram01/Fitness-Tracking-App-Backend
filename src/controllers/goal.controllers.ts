@@ -4,6 +4,7 @@
 import type { Request, Response, NextFunction } from "express";
 import Goal from "../models/goal.model.js";
 import catchAsync from "../utils/catchAsync.js";
+import { AppError } from "../utils/errorHandler.js";
 
 // add one more API for achieve goal or not
 
@@ -14,17 +15,19 @@ export const createGoal = catchAsync(
     const { goalType, currentVal, targetVal, unit, startDate, endDate } =
       req.body;
 
-    // Basic validation
-    if (
-      !goalType ||
-      !currentVal ||
-      !targetVal ||
-      !unit ||
-      !startDate ||
-      !endDate
-    ) {
-      return res.status(400).json({ message: "All fields are required." });
-    }
+    // // Basic validation
+    // if (
+    //   !goalType ||
+    //   !currentVal ||
+    //   !targetVal ||
+    //   !unit ||
+    //   !startDate ||
+    //   !endDate
+    // ) {
+    //   throw new AppError("All fields are required.", 400);
+
+    //   // return res.status(400).json({ message: "All fields are required." });
+    // }
 
     const newGoal = await Goal.create({
       user: userId,

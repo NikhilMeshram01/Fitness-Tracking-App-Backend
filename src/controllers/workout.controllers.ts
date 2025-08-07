@@ -4,14 +4,15 @@
 import type { Request, Response, NextFunction } from "express";
 import Workout from "../models/workout.model.js";
 import catchAsync from "../utils/catchAsync.js";
+import { AppError } from "../utils/errorHandler.js";
 
 // Create a new workout
 export const createNewWorkout = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user?.userId;
     const { duration, caloriesBurned, workoutDate, exerciseType } = req.body;
-    console.log("userId", userId);
-    console.log("req.body ->", req.body);
+    // console.log("userId", userId);
+    // console.log("req.body ->", req.body);
 
     const newWorkout = await Workout.create({
       user: userId,
@@ -68,7 +69,9 @@ export const getWorkout = catchAsync(
     });
 
     if (!workout) {
-      return res.status(404).json({ message: "Workout not found." });
+      throw new AppError("Workout not found.", 404);
+
+      // return res.status(404).json({ message: "Workout not found." });
     }
 
     res.status(200).json({ success: true, workout });
@@ -107,9 +110,11 @@ export const deleteWorkout = catchAsync(
     });
 
     if (!workout) {
-      return res
-        .status(404)
-        .json({ message: "Workout not found or not authorized." });
+      throw new AppError("Workout not found or not authorized.", 404);
+
+      // return res
+      //   .status(404)
+      //   .json({ message: "Workout not found or not authorized." });
     }
 
     res.status(200).json({

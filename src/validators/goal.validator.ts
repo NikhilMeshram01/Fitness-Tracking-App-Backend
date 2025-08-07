@@ -1,24 +1,34 @@
 import { z } from "zod";
 
 export const goalSchema = z.object({
-  user: z
-    .string()
-    .min(1, "User ID is required")
-    .nonempty("User ID is required"),
-
   goalType: z
     .enum(["loss", "gain"])
     .refine((val) => ["loss", "gain"].includes(val), {
       message: "Goal type must be either 'loss' or 'gain'",
     }),
 
-  currentVal: z.number().min(0, { message: "Current value must be positive" }),
+  currentVal: z
+    .string()
+    .nonempty("Current value is required")
+    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+      message: "Current value must be a positive number",
+    })
+    .transform((val) => Number(val)),
 
-  targetVal: z.number().min(0, { message: "Target value must be positive" }),
+  targetVal: z
+    .string()
+    .nonempty("Target value is required")
+    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+      message: "Target value must be a positive number",
+    })
+    .transform((val) => Number(val)),
 
-  unit: z.enum(["kg", "lbs"]).refine((val) => ["kg", "lbs"].includes(val), {
-    message: "Unit must be either 'kg' or 'lbs'",
-  }),
+  unit: z
+    .string()
+    .transform((val) => val.trim() || "kg")
+    .refine((val) => ["kg", "lbs"].includes(val), {
+      message: "Unit must be either 'kg' or 'lbs'",
+    }),
 
   startDate: z
     .string()
