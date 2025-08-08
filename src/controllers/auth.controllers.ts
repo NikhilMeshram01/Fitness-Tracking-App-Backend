@@ -29,7 +29,8 @@ export const registerUser = catchAsync(
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       // return res.status(409).json({ message: "Email already in use." });
-      throw new AppError("Email already in use.", 409);
+      // throw new AppError("Email already in use.", 409);
+      return next(new AppError("Email already in use.", 409));
     }
 
     // Create new user
@@ -85,7 +86,7 @@ export const loginUser = catchAsync(
     const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
-      throw new AppError("Invalid email or password.", 401);
+      return next(new AppError("Invalid email or password.", 401));
 
       // return res.status(401).json({ message: "Invalid email or password." });
     }
@@ -93,7 +94,7 @@ export const loginUser = catchAsync(
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      throw new AppError("Invalid email or password.", 401);
+      return next(new AppError("Invalid email or password.", 401));
 
       // return res.status(401).json({ message: "Invalid email or password." });
     }
@@ -151,7 +152,7 @@ export const getUserProfile = catchAsync(
     const userId = req.user?.userId; // Assuming `req.user` is set by auth middleware
 
     if (!userId) {
-      throw new AppError("Unauthorized: No user ID found.", 401);
+      return next(new AppError("Unauthorized: No user ID found.", 401));
 
       // return res
       //   .status(401)
@@ -161,7 +162,7 @@ export const getUserProfile = catchAsync(
     const user = await User.findById(userId).select("-password"); // Exclude password
 
     if (!user) {
-      throw new AppError("User not found.", 404);
+      return next(new AppError("User not found.", 404));
 
       // return res.status(404).json({ message: "User not found." });
     }

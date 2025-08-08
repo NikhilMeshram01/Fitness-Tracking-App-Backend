@@ -30,7 +30,7 @@ server.use(`${API_PREFIX}/users`, authRoutes);
 server.use(`${API_PREFIX}/workouts`, workoutRoutes);
 server.use(`${API_PREFIX}/goals`, goalRoutes);
 
-// // 404 handler
+// 404 handler
 // server.all("*", (req: Request, res: Response) => {
 //   res.status(404).json({ message: "Route not found" });
 // });
