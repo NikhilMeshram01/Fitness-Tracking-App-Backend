@@ -13,13 +13,13 @@ export const registerSchema = z.object({
     .nonempty("Password is required")
     .min(6, "Password must be at least 6 characters long"),
 
-  fname: z
+  firstName: z
     .string()
     .nonempty("First name is required")
     .trim()
     .min(1, "First name cannot be empty"),
 
-  lname: z
+  lastName: z
     .string()
     .nonempty("Last name is required")
     .trim()

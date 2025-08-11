@@ -16,8 +16,8 @@ export const registerUser = catchAsync(
     const {
       email,
       password,
-      fname,
-      lname,
+      firstName,
+      lastName,
       dob,
       gender,
       height,
@@ -35,10 +35,10 @@ export const registerUser = catchAsync(
 
     // Create new user
     const user = new User({
+      firstName,
+      lastName,
       email,
       password,
-      fname,
-      lname,
       dob,
       gender,
       height,

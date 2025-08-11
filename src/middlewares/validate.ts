@@ -6,8 +6,6 @@ import { AppError } from "../utils/errorHandler.js";
 export const validate =
   (schema: ZodObject<ZodRawShape>) =>
   (req: Request, res: Response, next: NextFunction) => {
-    console.log("--> zod validation executed");
-    console.log("req.body-->", req.body);
     try {
       req.body = schema.parse(req.body);
       next();

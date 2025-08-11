@@ -12,10 +12,10 @@ export interface IUser extends Document {
   gender: "male" | "female" | "other";
   height: number;
   weight: number;
-  role: string;
+  role?: string;
   level: "beginner" | "intermediate" | "advanced";
   profilePicture: string;
-  refrehToken: string;
+  refrehToken?: string;
   createdAt: Date;
   updatedAt: string;
 }

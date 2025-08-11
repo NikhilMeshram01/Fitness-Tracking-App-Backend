@@ -1,7 +1,11 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import express, { type Request, type Response } from "express";
+import express, {
+  type Request,
+  type Response,
+  type Application,
+} from "express";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import cors from "cors";
@@ -9,15 +13,23 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import workoutRoutes from "./routes/workout.routes.js";
 import goalRoutes from "./routes/goal.routes.js";
-import { PORT } from "./config/configs.js";
+import { CLIENT_URL, PORT } from "./config/configs.js";
 import { globalErrorHandler } from "./utils/errorHandler.js";
 import { apiLimiter } from "./config/rateLimiter.js";
 
-const server = express();
+const server: Application = express();
+
+// CORS setup
+server.use(
+  cors({
+    origin: CLIENT_URL,
+    credentials: true, // Allow cookies, authorization headers
+    optionsSuccessStatus: 200, // Some legacy browsers choke on 204
+  })
+);
 
 // // middlewares
 server.use(helmet());
-server.use(cors());
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
 server.use(cookieParser());

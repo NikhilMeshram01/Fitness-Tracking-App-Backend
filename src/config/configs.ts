@@ -10,6 +10,7 @@ function getEnvVar(key: string): string {
   return value;
 }
 
+export const CLIENT_URL = getEnvVar("CLIENT_URL");
 export const NODE_ENV = getEnvVar("NODE_ENV");
 export const PORT = Number(process.env.PORT) || 5000; // ensure PORT is a number
 
