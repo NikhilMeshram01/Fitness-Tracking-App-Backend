@@ -1,5 +1,21 @@
 import rateLimit from "express-rate-limit";
-import type { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction, RequestHandler } from "express";
+import { isIPv6 } from "node:net";
+
+// Safe IP key generator that normalizes IPv6 addresses
+function safeIpKeyGenerator(req: Request): string {
+  const rawIp = req.ip ?? "";
+  const ip = rawIp.trim();
+
+  if (ip === "::1") return "127.0.0.1";
+
+  if (isIPv6(ip)) {
+    const cleanedIp = ip.split("%")[0] || ""; // ✅ No error
+    return cleanedIp.replace(/:\d+$/, "");
+  }
+
+  return ip;
+}
 
 interface RateLimiterOptions {
   windowMs: number;
@@ -19,14 +35,16 @@ export const createRateLimiter = ({
     max,
     standardHeaders: true, // Send rate limit info in standard headers (RateLimit-*)
     legacyHeaders: false, // Disable legacy rate limit headers (X-RateLimit-*)
-    keyGenerator: (req: Request) => req.body?.email || req.ip, // Uses email from request body if available; otherwise defaults to IP address
-    handler: (req: Request, res: Response, next: NextFunction) => {
-      console.warn(`Rate limit exceeded for: ${req.ip}`);
+    keyGenerator:
+      keyGenerator ?? ((req) => req.body?.email || safeIpKeyGenerator(req)),
+    // Uses email from request body if available; otherwise defaults to IP address
+    handler: ((req: Request, res: Response, next: NextFunction) => {
+      console.warn(`Rate limit exceeded for: ${safeIpKeyGenerator(req)}`);
       res.status(429).json({
         success: false,
         message,
       });
-    },
+    }) as RequestHandler,
   });
 };
 
