@@ -18,21 +18,21 @@ const goalSchema = new Schema<IGoal>(
       ref: "User",
     },
     goalType: {
-        type:String,
-        enum:['loss', 'gain']
+      type: String,
+      enum: ["loss", "gain"],
     },
-    currentVal:Number,
-    targetVal:Number,
-    unit:{
-        type:String,
-        enum : ['kg', 'lbs']
+    currentVal: Number,
+    targetVal: Number,
+    unit: {
+      type: String,
+      enum: ["kg", "lbs"],
     },
-    startDate:Date,
-    endDate:Date,
-    isAchieved:{
-        type: Boolean,
-        default:false
-    }
+    startDate: Date,
+    endDate: Date,
+    isAchieved: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

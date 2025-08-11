@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express, { type Request, type Response } from "express";
+import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import cors from "cors";
 import connectDB from "./config/db.js";
@@ -10,6 +11,7 @@ import workoutRoutes from "./routes/workout.routes.js";
 import goalRoutes from "./routes/goal.routes.js";
 import { PORT } from "./config/configs.js";
 import { globalErrorHandler } from "./utils/errorHandler.js";
+import { apiLimiter } from "./config/rateLimiter.js";
 
 const server = express();
 
@@ -18,11 +20,18 @@ server.use(helmet());
 server.use(cors());
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
+server.use(cookieParser());
+
+// IMAGE UPLOAD FOR PROFILE PICTURE (USE MULTER)
+// CREATE FOLDER FOR TYPES AND ADD ALL THE INREFACES ANND TYPES IN IT
 
 // // health check
 server.get("/health", (req: Request, res: Response) =>
   res.json({ status: "OK" })
 );
+
+// RATE LIMITER
+server.use("/api", apiLimiter);
 
 // // routes
 const API_PREFIX = "/api/v1";
