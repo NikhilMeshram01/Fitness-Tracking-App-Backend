@@ -41,19 +41,21 @@ export const authenticateJWT = (
   res: Response,
   next: NextFunction
 ) => {
-  const authHeader = req.headers.authorization;
+  const token = req.cookies.token;
 
-  if (typeof authHeader !== "string" || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({
-      message: "token missing or malformed",
-    });
-  }
+  // if (typeof authHeader !== "string" || !authHeader.startsWith("token=")) {
+  //   return res.status(401).json({
+  //     message: "token missing or malformed",
+  //   });
+  // }
 
-  const token: string = authHeader.split(" ")[1]!;
+  // const token: string = authHeader.split("=")[1]!;
+  console.log("recieved token -->", token);
 
   try {
     const user = verifyToken(token, JWT_ACCESS_SECRET_KEY);
     req.user = user;
+    console.log("valid token");
     next();
   } catch (error) {
     return res

@@ -7,6 +7,7 @@ import {
   JWT_ACCESS_SECRET_KEY,
   JWT_REFRESH_EXPIRES_IN,
   JWT_REFRESH_SECRET_KEY,
+  NODE_ENV,
 } from "../config/configs.js";
 import catchAsync from "../utils/catchAsync.js";
 import { AppError } from "../utils/errorHandler.js";
@@ -63,7 +64,7 @@ export const registerUser = catchAsync(
 
     res.cookie("token", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
@@ -117,7 +118,7 @@ export const loginUser = catchAsync(
     // Set token in HTTP-only cookie
     res.cookie("token", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
@@ -135,9 +136,11 @@ export const loginUser = catchAsync(
 );
 
 export const logoutUser = catchAsync(async (req: Request, res: Response) => {
+  console.log("cookies --->", req.cookies);
+
   res.clearCookie("token", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: NODE_ENV === "production",
     sameSite: "strict",
   });
 

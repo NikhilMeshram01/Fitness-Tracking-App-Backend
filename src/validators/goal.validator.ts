@@ -2,47 +2,51 @@ import { z } from "zod";
 
 export const goalSchema = z.object({
   goalType: z
-    .enum(["loss", "gain"])
-    .refine((val) => ["loss", "gain"].includes(val), {
-      message: "Goal type must be either 'loss' or 'gain'",
-    }),
+    .enum([
+      "weight_loss",
+      "weight_gain",
+      "workout_frequency",
+      "calories",
+      "distance",
+    ])
+    .refine(
+      (val) =>
+        [
+          "weight_loss",
+          "weight_gain",
+          "workout_frequency",
+          "calories",
+          "distance",
+        ].includes(val),
+      {
+        message: "Goal type must be either 'loss' or 'gain'",
+      }
+    ),
 
-  currentVal: z
-    .string()
-    .nonempty("Current value is required")
-    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
-      message: "Current value must be a positive number",
-    })
-    .transform((val) => Number(val)),
+  currentValue: z.number().min(0, "Currnt value must be a positive number"),
 
-  targetVal: z
-    .string()
-    .nonempty("Target value is required")
-    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
-      message: "Target value must be a positive number",
-    })
-    .transform((val) => Number(val)),
+  targetValue: z.number().min(0, "Target value must be a positive number"),
 
   unit: z
     .string()
     .transform((val) => val.trim() || "kg")
-    .refine((val) => ["kg", "lbs"].includes(val), {
-      message: "Unit must be either 'kg' or 'lbs'",
-    }),
+    .refine(
+      (val) => ["kg", "lbs", "km", "calories", "workouts/week"].includes(val),
+      {
+        message: "Unit must be either 'kg' or 'lbs' or 'km'",
+      }
+    ),
 
-  startDate: z
+  targetDate: z
     .string()
     .nonempty("Start date is required")
     .refine((date) => !isNaN(Date.parse(date)), {
       message: "Start date must be a valid date string",
     }),
 
-  endDate: z
-    .string()
-    .nonempty("End date is required")
-    .refine((date) => !isNaN(Date.parse(date)), {
-      message: "End date must be a valid date string",
-    }),
+  title: z.string().nonempty("title date is required"),
 
-  isAchieved: z.boolean().default(false),
+  description: z.string().optional(),
+
+  isCompleted: z.boolean().default(false),
 });

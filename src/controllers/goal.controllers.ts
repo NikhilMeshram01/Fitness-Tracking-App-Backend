@@ -12,31 +12,30 @@ export const createGoal = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user?.userId;
 
-    const { goalType, currentVal, targetVal, unit, startDate, endDate } =
-      req.body;
+    const {
+      goalType,
+      currentValue,
+      targetValue,
+      unit,
+      targetDate,
+      isCompleted,
+      title,
+      description,
+    } = req.body;
 
-    // // Basic validation
-    // if (
-    //   !goalType ||
-    //   !currentVal ||
-    //   !targetVal ||
-    //   !unit ||
-    //   !startDate ||
-    //   !endDate
-    // ) {
-    //   throw new AppError("All fields are required.", 400);
-
-    //   // return res.status(400).json({ message: "All fields are required." });
-    // }
+    console.log(req.body);
+    console.log(userId);
 
     const newGoal = await Goal.create({
       user: userId,
       goalType,
-      currentVal,
-      targetVal,
+      title,
+      description,
+      currentValue,
+      targetValue,
       unit,
-      startDate,
-      endDate,
+      targetDate,
+      isCompleted,
     });
 
     res.status(201).json({

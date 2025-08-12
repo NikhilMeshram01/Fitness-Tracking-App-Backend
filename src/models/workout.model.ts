@@ -1,11 +1,20 @@
 import { Document, Schema, Types, model } from "mongoose";
+import { string } from "zod";
 
 export interface IWorkout extends Document {
   user: Types.ObjectId;
   duration: number;
   caloriesBurned: number;
   workoutDate: Date;
-  exerciseType: "cardio" | "strength" | "yoga" | "flexibility";
+  exerciseType:
+    | "cardio"
+    | "strength"
+    | "yoga"
+    | "flexibility"
+    | "sports"
+    | "other";
+  name: string;
+  notes?: string;
 }
 
 const workoutSchema = new Schema<IWorkout>(
@@ -19,8 +28,10 @@ const workoutSchema = new Schema<IWorkout>(
     workoutDate: Date,
     exerciseType: {
       type: String,
-      enum: ["cardio", "strength", "yoga", "flexibilty"],
+      enum: ["cardio", "strength", "yoga", "flexibility", "sports", "other"],
     },
+    name: String,
+    notes: String,
   },
   { timestamps: true }
 );

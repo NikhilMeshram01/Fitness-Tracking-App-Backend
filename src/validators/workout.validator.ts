@@ -16,12 +16,28 @@ export const workoutSchema = z.object({
     }),
 
   exerciseType: z
-    .enum(["cardio", "strength", "yoga", "flexibility"])
+    .enum(["cardio", "strength", "yoga", "flexibility", "sports", "other"])
     .refine(
-      (val) => ["cardio", "strength", "yoga", "flexibility"].includes(val),
+      (val) =>
+        [
+          "cardio",
+          "strength",
+          "yoga",
+          "flexibility",
+          "sports",
+          "other",
+        ].includes(val),
       {
         message:
           "Exercise type must be one of: cardio, strength, yoga, flexibility",
       }
     ),
+
+  name: z
+    .string()
+    .nonempty("name is required")
+    .trim()
+    .min(1, "First name cannot be empty"),
+
+  notes: z.string().optional(),
 });
