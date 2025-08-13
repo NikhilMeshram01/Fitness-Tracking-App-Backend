@@ -60,65 +60,93 @@ export const getAllGoals = catchAsync(
   }
 );
 
-// export const createGoal = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//   try {
-//     const userId = req.user?.userId;
+export const updateGoal = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    console.log("hit update goal");
+    const goalId = req.params.id;
 
-//     const { goalType, currentVal, targetVal, unit, startDate, endDate } =
-//       req.body;
+    if (!goalId) {
+      return next(new AppError("Goal ID is required", 400));
+    }
 
-//     // Basic validation
-//     if (
-//       !goalType ||
-//       !currentVal ||
-//       !targetVal ||
-//       !unit ||
-//       !startDate ||
-//       !endDate
-//     ) {
-//       return res.status(400).json({ message: "All fields are required." });
-//     }
+    const updatedGoal = await Goal.findOneAndUpdate(
+      { _id: goalId, user: req.user?.userId }, // Ensure the goal belongs to the user
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
-//     const newGoal = await Goal.create({
-//       user: userId,
-//       goalType,
-//       currentVal,
-//       targetVal,
-//       unit,
-//       startDate,
-//       endDate,
-//     });
+    if (!updatedGoal) {
+      return next(new AppError("Goal not found or not authorized", 404));
+    }
 
-//     res.status(201).json({
-//       success: true,
-//       message: "Goal created successfully.",
-//       goal: newGoal,
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+    res.status(200).json({
+      status: "success",
+      message: "Goal updated successfully",
+      data: {
+        goal: updatedGoal,
+      },
+    });
+  }
+);
 
-// export const getAllGoals = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//   try {
-//     const userId = req.user?.userId;
+export const markCompleted = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { itemId } = req.params;
 
-//     const goals = await Goal.find({ user: userId }).sort({ createdAt: -1 });
+    if (!itemId) {
+      return next(new AppError("Gaol ID is required", 400));
+    }
 
-//     res.status(200).json({
-//       success: true,
-//       count: goals.length,
-//       goals,
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+    const updatedItem = await Goal.findByIdAndUpdate(
+      itemId,
+      { completed: true },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedItem) {
+      return next(new AppError("Item not found", 404));
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "Item marked as completed",
+      item: updatedItem,
+    });
+  }
+);
+
+export const getGoal = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const goal = await Goal.findOne({
+      _id: req.params.id,
+      user: req.user?.userId,
+    });
+
+    if (!goal) {
+      throw new AppError("Goal not found.", 404);
+    }
+
+    res.status(200).json({ success: true, goal });
+  }
+);
+
+export const deleteGoal = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const goal = await Goal.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user?.userId,
+    });
+
+    if (!goal) {
+      throw new AppError("Goal not found or not authorized.", 404);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Goal deleted successfully.",
+    });
+  }
+);
