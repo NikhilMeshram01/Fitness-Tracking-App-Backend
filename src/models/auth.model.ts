@@ -15,7 +15,7 @@ export interface IUser extends Document {
   role?: string;
   level: "beginner" | "intermediate" | "advanced";
   profilePicture: string;
-  refrehToken?: string;
+  refreshToken?: string;
   createdAt: Date;
   updatedAt: string;
 }
@@ -49,7 +49,10 @@ const userSchema = new Schema<IUser>(
     height: Number,
     weight: Number,
     profilePicture: String,
-    refrehToken: String,
+    refreshToken: {
+      type: String,
+      default: "",
+    },
     level: {
       type: String,
       enum: ["beginner", "intermediate", "advanced"],

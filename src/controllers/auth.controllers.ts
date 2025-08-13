@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import jwt from "jsonwebtoken";
 import User from "../models/auth.model.js";
 import { generateToken } from "../utils/jwt.js";
 import bcrypt from "bcryptjs";
@@ -56,14 +57,21 @@ export const registerUser = catchAsync(
       JWT_REFRESH_EXPIRES_IN
     );
 
-    user.refrehToken = refreshToken;
+    user.refreshToken = refreshToken;
 
     await user.save();
 
+    const isProduction = NODE_ENV === "production";
     res.cookie("token", accessToken, {
       httpOnly: true,
-      secure: NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: isProduction ? "strict" : "lax",
+      secure: isProduction,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      sameSite: isProduction ? "strict" : "lax",
+      secure: isProduction,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -86,16 +94,12 @@ export const loginUser = catchAsync(
 
     if (!user) {
       return next(new AppError("Invalid email or password.", 401));
-
-      // return res.status(401).json({ message: "Invalid email or password." });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return next(new AppError("Invalid email or password.", 401));
-
-      // return res.status(401).json({ message: "Invalid email or password." });
     }
 
     const accessToken = generateToken(
@@ -103,21 +107,28 @@ export const loginUser = catchAsync(
       JWT_ACCESS_SECRET_KEY,
       JWT_ACCESS_EXPIRES_IN
     );
-    // const refreshToken = generateToken(
-    //   { userId: user._id.toString() },
-    //   JWT_REFRESH_SECRET_KEY,
-    //   JWT_REFRESH_EXPIRES_IN
-    // );
+    const refreshToken = generateToken(
+      { userId: user._id.toString() },
+      JWT_REFRESH_SECRET_KEY,
+      JWT_REFRESH_EXPIRES_IN
+    );
 
-    // user.refrehToken = refreshToken;
+    user.refreshToken = refreshToken;
 
-    // await user.save();
+    await user.save();
 
     // Set token in HTTP-only cookie
+    const isProduction = NODE_ENV === "production";
     res.cookie("token", accessToken, {
       httpOnly: true,
-      secure: NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: isProduction ? "strict" : "lax",
+      secure: isProduction,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      sameSite: isProduction ? "strict" : "lax",
+      secure: isProduction,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -134,12 +145,27 @@ export const loginUser = catchAsync(
 );
 
 export const logoutUser = catchAsync(async (req: Request, res: Response) => {
-  console.log("cookies --->", req.cookies);
+  const refreshToken = req.cookies.refreshToken;
+  if (refreshToken) {
+    const user = await User.findOne({ refreshToken });
+    if (user) {
+      await User.updateOne({ refreshToken }, { $unset: { refreshToken: 1 } });
+      // user.refreshToken = ""; // Invalidate token
+      await user.save();
+    }
+  }
+
+  const isProduction = NODE_ENV === "production";
 
   res.clearCookie("token", {
     httpOnly: true,
-    secure: NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: isProduction ? "strict" : "lax",
+    secure: isProduction,
+  });
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    sameSite: isProduction ? "strict" : "lax",
+    secure: isProduction,
   });
 
   return res.status(200).json({
@@ -147,6 +173,66 @@ export const logoutUser = catchAsync(async (req: Request, res: Response) => {
     message: "Logged out successfully",
   });
 });
+
+export const refreshTokenHandler = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.cookies.refreshToken;
+
+    if (!token) {
+      return next(new AppError("Refresh token missing", 401));
+    }
+
+    let payload: any;
+    try {
+      payload = jwt.verify(token, JWT_REFRESH_SECRET_KEY);
+    } catch (error) {
+      return next(new AppError("Invalid or expired refresh token", 403));
+    }
+
+    const user = await User.findById(payload.userId);
+
+    if (!user || user.refreshToken !== token) {
+      return next(new AppError("Refresh token mismatch", 403));
+    }
+
+    // Generate new tokens
+    const newAccessToken = generateToken(
+      { userId: user._id.toString() },
+      JWT_ACCESS_SECRET_KEY,
+      JWT_ACCESS_EXPIRES_IN
+    );
+
+    const newRefreshToken = generateToken(
+      { userId: user._id.toString() },
+      JWT_REFRESH_SECRET_KEY,
+      JWT_REFRESH_EXPIRES_IN
+    );
+
+    // Rotate refresh token
+    user.refreshToken = newRefreshToken;
+    await user.save();
+
+    res.cookie("token", newAccessToken, {
+      httpOnly: true,
+      secure: NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000, // 15 mins (or match your access token expiry)
+    });
+
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.status(200).json({
+      success: true,
+      token: newAccessToken,
+      message: "Token refreshed successfully",
+    });
+  }
+);
 
 export const updateProfile = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -186,23 +272,22 @@ export const updateProfile = catchAsync(
   }
 );
 
+// controllers/auth.controller.ts
 export const getUserProfile = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const userId = req.user?.userId; // Assuming `req.user` is set by auth middleware
-
-    if (!userId) {
-      return next(new AppError("Unauthorized: No user ID found.", 401));
+    if (!req.user?.userId) {
+      return next(new AppError("Not authorized, no user ID found", 401));
     }
 
-    const user = await User.findById(userId).select("-password"); // Exclude password
+    const user = await User.findById(req.user.userId).select("-password");
 
     if (!user) {
-      return next(new AppError("User not found.", 404));
+      return next(new AppError("User not found", 404));
     }
 
     res.status(200).json({
       success: true,
-      data: user,
+      user,
     });
   }
 );

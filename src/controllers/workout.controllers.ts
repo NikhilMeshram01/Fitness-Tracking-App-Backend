@@ -37,19 +37,24 @@ export const createNewWorkout = catchAsync(
 export const getAllWorkouts = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user?.userId;
-    console.log("getAllWorkouts controller hit", userId);
 
     // Get page and limit from query params, defaulting to 1 and 10
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
-
+    console.log("--->", req.query.sortBy);
+    // Sorting
+    const sortBy = (req.query.sortBy as string) || "workoutDate";
+    const order = (req.query.order as string) === "asc" ? 1 : -1;
+    const sortObj: Record<string, 1 | -1> = {};
+    sortObj[sortBy] = order;
+    // console.log(sortBy, order);
     // Total count (for pagination metadata)
     const total = await Workout.countDocuments({ user: userId });
 
     // Paginated data
     const workouts = await Workout.find({ user: userId })
-      .sort({ workoutDate: -1 })
+      .sort(sortObj)
       .skip(skip)
       .limit(limit);
 
