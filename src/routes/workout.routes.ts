@@ -4,6 +4,7 @@ import {
   deleteWorkout,
   getAllWorkouts,
   getWorkout,
+  last30Days,
   updateWorkout,
 } from "../controllers/workout.controllers.js";
 import { authenticateJWT } from "../utils/jwt.js";
@@ -16,6 +17,7 @@ router.use(authenticateJWT);
 
 router.post("/", validate(workoutSchema), createNewWorkout);
 router.get("/", getAllWorkouts);
+router.get("/last30days", last30Days);
 router.get("/:id", getWorkout);
 router.put("/:id", validate(workoutSchema), updateWorkout);
 router.delete("/:id", deleteWorkout);
