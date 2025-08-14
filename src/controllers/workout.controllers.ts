@@ -45,6 +45,7 @@ export const getAllWorkouts = catchAsync(
     // Sorting
     const sortBy = (req.query.sortBy as string) || "workoutDate";
     const order = (req.query.order as string) === "asc" ? 1 : -1;
+    console.log("req.query.order-->", req.query.order);
     const sortObj: Record<string, 1 | -1> = {};
     sortObj[sortBy] = order;
     // console.log(sortBy, order);
