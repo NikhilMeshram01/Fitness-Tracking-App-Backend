@@ -17,10 +17,8 @@ router.use(authenticateJWT);
 
 router.post("/", validate(goalSchema), createGoal);
 router.get("/", getAllGoals);
-
 router.put("/:id", updateGoal);
 router.patch("/:id", markCompleted);
-
 router.delete("/:id", deleteGoal);
 router.get("/:id", getGoal);
 
