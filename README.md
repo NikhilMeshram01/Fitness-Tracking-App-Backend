@@ -29,15 +29,18 @@
    git clone https://github.com/NikhilMeshram01/Fitness-Tracking-App-Backend.git
    cd Fitness-Tracking-App-Backend
    ```
-2. ```npm install
+2. ```
+   npm install
 
    ```
 
-3. ```npm run build
+3. ```
+   npm run build
 
    ```
 
-4. ```npm start
+4. ```
+   npm start
 
    ```
 
