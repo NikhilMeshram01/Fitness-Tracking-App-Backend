@@ -11,13 +11,12 @@
    - number of workouts per week
    - Specific weight goal
 7. Track Progress and visualization using charts
-8. Notify users when they are close to achieving their goals or when they have met a goal.
 
 ## Tech Stack
 
 - Node.JS
-- Typescript
 - Express.JS
+- Typescript
 - MongoDB (mongoose)
 - JWT
 - zod
@@ -25,21 +24,21 @@
 
 ## How to Run the App
 
-### Backend
-
 1. Clone the repo:
    ```bash
    git clone https://github.com/NikhilMeshram01/Fitness-Tracking-App-Backend.git
-   cd fitness-tracker
+   cd Fitness-Tracking-App-Backend
    ```
-2. ```
-               npm install
+2. ```npm install
+
    ```
-3. ```
-               npm run build
+
+3. ```npm run build
+
    ```
-4. ```
-               npm start
+
+4. ```npm start
+
    ```
 
 ## APIs
