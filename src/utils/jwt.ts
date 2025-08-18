@@ -13,11 +13,6 @@ export const generateToken = (
   secret: string,
   expiresIn: SignOptions["expiresIn"] = "2m"
 ) => {
-  console.log(
-    "generateToken called with expiresIn:",
-    expiresIn,
-    typeof expiresIn
-  );
   return jwt.sign(payload, secret, { expiresIn: expiresIn }); // ✅ Works fine
 };
 

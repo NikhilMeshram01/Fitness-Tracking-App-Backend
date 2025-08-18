@@ -6,6 +6,7 @@ import {
   registerUser,
   updateProfile,
   refreshTokenHandler,
+  uploadProfilePic,
 } from "../controllers/auth.controllers.js";
 import { authenticateJWT } from "../utils/jwt.js";
 import { validate } from "../middlewares/validate.js";
@@ -15,6 +16,7 @@ import {
   updateSchema,
 } from "../validators/auth.validator.js";
 import { loginLimiter } from "../config/rateLimiter.js";
+import { upload } from "../config/upload.js";
 
 const router = express.Router();
 
@@ -23,6 +25,12 @@ router.post("/login", loginLimiter, validate(loginSchema), loginUser);
 router.post("/logout", logoutUser);
 router.get("/profile", authenticateJWT, getUserProfile);
 router.patch("/update", authenticateJWT, validate(updateSchema), updateProfile);
+router.post(
+  "/upload-picture",
+  authenticateJWT,
+  upload.single("profilePicture"),
+  uploadProfilePic
+);
 router.post("/refresh-token", refreshTokenHandler);
 
 export default router;

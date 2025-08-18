@@ -7,6 +7,9 @@ import express, {
   type Application,
 } from "express";
 import cookieParser from "cookie-parser";
+import path from "path";
+import { fileURLToPath } from "url";
+import multer from "multer";
 import helmet from "helmet";
 import cors from "cors";
 import connectDB from "./config/db.js";
@@ -18,11 +21,13 @@ import { globalErrorHandler } from "./utils/errorHandler.js";
 import { apiLimiter } from "./config/rateLimiter.js";
 
 const server: Application = express();
+const upload = multer({ dest: "uploads/" });
 
 // CORS setup
 server.use(
   cors({
     origin: CLIENT_URL,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true, // Allow cookies, authorization headers
     optionsSuccessStatus: 200, // Some legacy browsers choke on 204
   })
@@ -34,9 +39,6 @@ server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
 server.use(cookieParser());
 
-// IMAGE UPLOAD FOR PROFILE PICTURE (USE MULTER)
-// CREATE FOLDER FOR TYPES AND ADD ALL THE INREFACES ANND TYPES IN IT
-
 // // health check
 server.get("/health", (req: Request, res: Response) =>
   res.json({ status: "OK" })
@@ -44,6 +46,12 @@ server.get("/health", (req: Request, res: Response) =>
 
 // RATE LIMITER
 server.use("/api", apiLimiter);
+
+// server static files
+// Recreate __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+server.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // // routes
 const API_PREFIX = "/api/v1";

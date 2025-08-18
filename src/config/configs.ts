@@ -1,7 +1,9 @@
 import dotenv from "dotenv";
-import type { SignOptions } from "jsonwebtoken";
 dotenv.config();
+import type { SignOptions } from "jsonwebtoken";
 
+// TypeScript utility that safely retrieves environment variables
+// and throws an error if the variable is missing.
 function getEnvVar(key: string): string {
   const value = process.env[key];
   if (!value) {
@@ -23,3 +25,7 @@ export const JWT_ACCESS_EXPIRES_IN: SignOptions["expiresIn"] = (process.env
 export const JWT_REFRESH_SECRET_KEY = getEnvVar("JWT_REFRESH_SECRET_KEY");
 export const JWT_REFRESH_EXPIRES_IN: SignOptions["expiresIn"] = (process.env
   .JWT_REFRESH_EXPIRES_IN || "7d") as SignOptions["expiresIn"];
+
+export const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
+export const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY;
+export const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;

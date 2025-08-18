@@ -17,7 +17,7 @@ export interface IUser extends Document {
   profilePicture: string;
   refreshToken?: string;
   createdAt: Date;
-  updatedAt: string;
+  updatedAt: Date;
 }
 
 const userSchema = new Schema<IUser>(

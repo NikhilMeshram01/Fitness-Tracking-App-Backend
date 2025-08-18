@@ -103,4 +103,6 @@ export const updateSchema = z.object({
     .refine((val) => ["beginner", "intermediate", "advanced"].includes(val), {
       message: "Invalid level option",
     }),
+
+  profilePicture: z.string().optional(),
 });

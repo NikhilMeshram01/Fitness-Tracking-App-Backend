@@ -12,6 +12,7 @@ import {
 } from "../config/configs.js";
 import catchAsync from "../utils/catchAsync.js";
 import { AppError } from "../utils/errorHandler.js";
+import uploadOnCloudinary from "../config/cloudinary.js";
 
 export const registerUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -57,15 +58,19 @@ export const registerUser = catchAsync(
       JWT_REFRESH_EXPIRES_IN
     );
 
+    if (!refreshToken || !accessToken) {
+      return next(new AppError("Missing authentication tokens.", 401));
+    }
+
     user.refreshToken = refreshToken;
 
     await user.save();
 
     const isProduction = NODE_ENV === "production";
     res.cookie("token", accessToken, {
-      httpOnly: true,
-      sameSite: isProduction ? "strict" : "lax",
-      secure: isProduction,
+      httpOnly: true, // Prevents client-side JavaScript from accessing the cookie (protects against XSS attacks).
+      sameSite: isProduction ? "strict" : "lax", // "strinct" -> the cookie will only be sent in same-site requests (more secure).
+      secure: isProduction, // if true -> Ensures the cookie is only sent over HTTPS in production.
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
     res.cookie("refreshToken", refreshToken, {
@@ -113,6 +118,9 @@ export const loginUser = catchAsync(
       JWT_REFRESH_EXPIRES_IN
     );
 
+    if (!refreshToken || !accessToken)
+      return next(new AppError("Missing authentication tokens.", 401));
+
     user.refreshToken = refreshToken;
 
     await user.save();
@@ -150,7 +158,6 @@ export const logoutUser = catchAsync(async (req: Request, res: Response) => {
     const user = await User.findOne({ refreshToken });
     if (user) {
       await User.updateOne({ refreshToken }, { $unset: { refreshToken: 1 } });
-      // user.refreshToken = ""; // Invalidate token
       await user.save();
     }
   }
@@ -186,6 +193,7 @@ export const refreshTokenHandler = catchAsync(
     try {
       payload = jwt.verify(token, JWT_REFRESH_SECRET_KEY);
     } catch (error) {
+      console.log("error refreshing token", error);
       return next(new AppError("Invalid or expired refresh token", 403));
     }
 
@@ -207,6 +215,9 @@ export const refreshTokenHandler = catchAsync(
       JWT_REFRESH_SECRET_KEY,
       JWT_REFRESH_EXPIRES_IN
     );
+
+    if (!newRefreshToken || !newAccessToken)
+      return next(new AppError("Missing authentication tokens.", 401));
 
     // Rotate refresh token
     user.refreshToken = newRefreshToken;
@@ -236,12 +247,10 @@ export const refreshTokenHandler = catchAsync(
 
 export const updateProfile = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    console.log("update profile controller hit");
     const { email, firstName, lastName, dob, gender, height, weight, level } =
       req.body;
 
     const userId = req.user?.userId; // Assuming req.user is set by auth middleware
-    console.log("userId -->", userId);
     if (!userId) {
       return next(new AppError("User not authenticated", 401));
     }
@@ -267,6 +276,36 @@ export const updateProfile = catchAsync(
     res.status(200).json({
       status: "success",
       message: "Profile updated successfully",
+      user,
+    });
+  }
+);
+
+export const uploadProfilePic = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    // const file = req.file as Express.Multer.File;
+    // const localPath = file.path;
+
+    const userId = req.user?.userId; // Assuming req.user is set by auth middleware
+    if (!userId) return next(new AppError("User not authenticated", 401));
+
+    const user = await User.findById(userId);
+
+    if (!user) return next(new AppError("User not found", 404));
+
+    if (!req.file) return next(new AppError("No image file provided", 400));
+
+    let pic = req.file.path;
+    const imageURL = await uploadOnCloudinary(pic);
+    if (!imageURL) return next(new AppError("Failed to upload image", 400));
+
+    if (imageURL) user.profilePicture = imageURL;
+
+    await user.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "Profile Picture updated successfully",
       user,
     });
   }

@@ -73,8 +73,8 @@ export const updateGoal = catchAsync(
       { _id: goalId, user: req.user?.userId }, // Ensure the goal belongs to the user
       req.body,
       {
-        new: true,
-        runValidators: true,
+        new: true, // Returns the updated document instead of the original.
+        runValidators: true, // Ensures the update follows your Mongoose schema rules (important for type and value constraints).
       }
     );
 
