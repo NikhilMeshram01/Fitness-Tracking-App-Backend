@@ -283,9 +283,6 @@ export const updateProfile = catchAsync(
 
 export const uploadProfilePic = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    // const file = req.file as Express.Multer.File;
-    // const localPath = file.path;
-
     const userId = req.user?.userId; // Assuming req.user is set by auth middleware
     if (!userId) return next(new AppError("User not authenticated", 401));
 

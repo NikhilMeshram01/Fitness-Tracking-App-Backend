@@ -23,9 +23,6 @@ export const createGoal = catchAsync(
       description,
     } = req.body;
 
-    console.log(req.body);
-    console.log(userId);
-
     const newGoal = await Goal.create({
       user: userId,
       goalType,
@@ -62,7 +59,6 @@ export const getAllGoals = catchAsync(
 
 export const updateGoal = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    console.log("hit update goal");
     const goalId = req.params.id;
 
     if (!goalId) {

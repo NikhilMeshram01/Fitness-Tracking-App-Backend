@@ -10,7 +10,6 @@ import mongoose from "mongoose";
 // Create a new workout
 export const createNewWorkout = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    console.log("createNewWorkout controller hit", req.body);
     const userId = req.user?.userId;
     const { duration, caloriesBurned, workoutDate, exerciseType, name } =
       req.body;
@@ -45,10 +44,9 @@ export const getAllWorkouts = catchAsync(
     // Sorting
     const sortBy = (req.query.sortBy as string) || "workoutDate";
     const order = (req.query.order as string) === "asc" ? 1 : -1;
-    console.log("req.query.order-->", req.query.order);
     const sortObj: Record<string, 1 | -1> = {};
     sortObj[sortBy] = order;
-    // console.log(sortBy, order);
+
     // Total count (for pagination metadata)
     const total = await Workout.countDocuments({ user: userId });
 

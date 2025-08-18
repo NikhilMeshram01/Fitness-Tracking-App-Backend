@@ -1,5 +1,4 @@
 import { Document, Schema, Types, model } from "mongoose";
-import { string } from "zod";
 
 export interface IWorkout extends Document {
   user: Types.ObjectId;

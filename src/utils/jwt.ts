@@ -45,12 +45,10 @@ export const authenticateJWT = (
   // }
 
   // const token: string = authHeader.split("=")[1]!;
-  console.log("recieved token -->", token);
 
   try {
     const user = verifyToken(token, JWT_ACCESS_SECRET_KEY);
     req.user = user;
-    console.log("valid token");
     next();
   } catch (error) {
     return res
